@@ -14,9 +14,11 @@ jobs:
     # 使用矩阵策略，同时在不同的操作系统上运行
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-22.04, windows-latest]
         include: # 定义特定OS的输出文件名后缀
-          - os: ubuntu 22.04
+          # - os: ubuntu-latest
+          - os: ubuntu-22.04
             suffix: "_linux"
             file_extension: ""
           - os: windows-latest
