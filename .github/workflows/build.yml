@@ -45,8 +45,14 @@ jobs:
             STATIC_FLAG="-static"
           fi
           
-          # 运行编译命令：g++ -o [输出文件名] main.cpp [静态链接标志]
-          g++ -o "$OUTPUT_NAME" main.cpp person.cpp $STATIC_FLAG
+          # 【优化】新增编译和链接优化标志：
+          # -O3: 启用最高级优化
+          # -s: 移除符号表和调试信息（减小体积）
+          # -flto: 启用链接时优化
+          OPTIMIZATION_FLAGS="-O3 -s -flto"
+          
+          # 运行编译命令：g++ -o [输出文件名] main.cpp person.cpp [优化标志] [静态链接标志]
+          g++ -o "$OUTPUT_NAME" main.cpp person.cpp $OPTIMIZATION_FLAGS $STATIC_FLAG
           
           echo "EXECUTABLE_NAME=$OUTPUT_NAME" >> $GITHUB_OUTPUT # 将文件名保存为步骤输出
 
