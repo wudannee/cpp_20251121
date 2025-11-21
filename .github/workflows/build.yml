@@ -37,8 +37,17 @@ jobs:
         run: |
           # 动态生成输出文件名 (e.g., main_linux 或 main_windows.exe)
           OUTPUT_NAME="main${{ matrix.suffix }}${{ matrix.file_extension }}"
-          # 运行编译命令：g++ -o [输出文件名] main.cpp
-          g++ -o "$OUTPUT_NAME" main.cpp
+          
+          # 【新增】动态确定是否使用静态链接标志
+          STATIC_FLAG=""
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            # 在 Windows (MinGW/g++) 上使用 -static 进行静态链接
+            STATIC_FLAG="-static"
+          fi
+          
+          # 运行编译命令：g++ -o [输出文件名] main.cpp [静态链接标志]
+          g++ -o "$OUTPUT_NAME" main.cpp $STATIC_FLAG
+          
           echo "EXECUTABLE_NAME=$OUTPUT_NAME" >> $GITHUB_OUTPUT # 将文件名保存为步骤输出
 
       # 步骤 3: 上传编译好的可执行文件作为Artifact (工件)
