@@ -14,10 +14,8 @@ jobs:
     # 使用矩阵策略，同时在不同的操作系统上运行
     strategy:
       matrix:
-        # os: [ubuntu-latest, windows-latest]
         os: [ubuntu-22.04, windows-latest]
         include: # 定义特定OS的输出文件名后缀
-          # - os: ubuntu-latest
           - os: ubuntu-22.04
             suffix: "_linux"
             file_extension: ""
@@ -34,6 +32,8 @@ jobs:
       # 步骤 2: 编译 C++ 代码
       - name: Compile C++ with G++
         id: compile_step # 给这个步骤一个ID，以便后续引用它的输出
+        # FIX: 显式指定使用 Bash Shell，确保在 Windows 和 Linux 上语法一致
+        shell: bash
         run: |
           # 动态生成输出文件名 (e.g., main_linux 或 main_windows.exe)
           OUTPUT_NAME="main${{ matrix.suffix }}${{ matrix.file_extension }}"
