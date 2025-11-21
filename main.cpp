@@ -13,5 +13,6 @@ int main() {
     // 打印程序运行的平台信息
     std::cout << "Hello from C++!" << std::endl;
     std::cout << "This executable was compiled for: " << PLATFORM_NAME << std::endl;
+    std::cin.get();
     return 0;
 }
