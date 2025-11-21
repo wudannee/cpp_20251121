@@ -35,23 +35,29 @@ jobs:
         # FIX: 显式指定使用 Bash Shell，确保在 Windows 和 Linux 上语法一致
         shell: bash
         run: |
-          # 动态生成输出文件名 (e.g., main_linux 或 main_windows.exe)
-          OUTPUT_NAME="main${{ matrix.suffix }}${{ matrix.file_extension }}"
+          # 1. 提取 g++ 的完整版本号 (例如 11.4.0)
+          FULL_GCC_VERSION=$(g++ -dumpversion)
+          # 【更新】提取主要版本和次要版本 (例如 11.4.0 -> 11.4)
+          MAJOR_MINOR_VERSION=$(echo $FULL_GCC_VERSION | cut -d. -f1-2)
+          GCC_VERSION_TAG="_gcc_v${MAJOR_MINOR_VERSION}" # 格式如 _gcc_v11.4
           
-          # 【新增】动态确定是否使用静态链接标志
+          # 2. 动态确定是否使用静态链接标志
           STATIC_FLAG=""
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             # 在 Windows (MinGW/g++) 上使用 -static 进行静态链接
             STATIC_FLAG="-static"
           fi
           
-          # 【优化】新增编译和链接优化标志：
-          # -O3: 启用最高级优化
-          # -s: 移除符号表和调试信息（减小体积）
-          # -flto: 启用链接时优化
+          # 3. 优化标志
           OPTIMIZATION_FLAGS="-O3 -s -flto"
           
-          # 运行编译命令：g++ -o [输出文件名] main.cpp person.cpp [优化标志] [静态链接标志]
+          # 4. 动态生成最终输出文件名 (包含后缀和 GCC 版本标签)
+          # 示例: main_linux_ubuntu-22.04_gcc_v11.4 或 main_windows_gcc_v14.1.exe
+          OUTPUT_NAME="main${{ matrix.suffix }}${GCC_VERSION_TAG}${{ matrix.file_extension }}"
+          
+          echo "Compiling as: $OUTPUT_NAME using GCC v$MAJOR_MINOR_VERSION"
+          
+          # 5. 运行编译命令
           g++ -o "$OUTPUT_NAME" main.cpp person.cpp $OPTIMIZATION_FLAGS $STATIC_FLAG
           
           echo "EXECUTABLE_NAME=$OUTPUT_NAME" >> $GITHUB_OUTPUT # 将文件名保存为步骤输出
