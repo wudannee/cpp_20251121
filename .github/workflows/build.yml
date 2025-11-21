@@ -17,7 +17,7 @@ jobs:
         os: [ubuntu-22.04, windows-latest]
         include: # 定义特定OS的输出文件名后缀
           - os: ubuntu-22.04
-            suffix: "_linux"
+            suffix: "_linux_ubuntu-22.04"
             file_extension: ""
           - os: windows-latest
             suffix: "_windows"
@@ -46,7 +46,7 @@ jobs:
           fi
           
           # 运行编译命令：g++ -o [输出文件名] main.cpp [静态链接标志]
-          g++ -o "$OUTPUT_NAME" main.cpp $STATIC_FLAG
+          g++ -o "$OUTPUT_NAME" main.cpp person.cpp $STATIC_FLAG
           
           echo "EXECUTABLE_NAME=$OUTPUT_NAME" >> $GITHUB_OUTPUT # 将文件名保存为步骤输出
 
