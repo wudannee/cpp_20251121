@@ -72,7 +72,7 @@ jobs:
         with:
           # 使用当前的 Tag 名称作为 Release 的名称
           name: Release ${{ github.ref_name }} 
-          # 上传 artifacts 文件夹下的所有文件作为 Release 附件
-          files: ./artifacts/*
+          # FIX: 使用 '**/*' 递归模式来匹配所有子目录下的文件
+          files: ./artifacts/**/*
           draft: false # 直接发布，不作为草稿
           prerelease: false
