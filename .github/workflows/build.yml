@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           # 1. 提取 g++ 的完整版本号 (例如 11.4.0)
-          FULL_GCC_VERSION=$(g++ -dumpversion)
+          FULL_GCC_VERSION=$(g++ -dumpfullversion)
           # 【更新】提取主要版本和次要版本 (例如 11.4.0 -> 11.4)
           MAJOR_MINOR_VERSION=$(echo $FULL_GCC_VERSION | cut -d. -f1-2)
           GCC_VERSION_TAG="_gcc_v${MAJOR_MINOR_VERSION}" # 格式如 _gcc_v11.4
