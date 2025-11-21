@@ -1,0 +1,76 @@
+name: C++ Build and Release # 工作流名称
+
+# 只有当推送了新的 Git Tag (标签)，且标签名以 'v' 开头时，才触发此工作流
+on:
+  push:
+    tags:
+      - 'v*' 
+
+jobs:
+  # ==================================
+  # 任务 1: Build (编译)
+  # ==================================
+  build:
+    # 使用矩阵策略，同时在不同的操作系统上运行
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include: # 定义特定OS的输出文件名后缀
+          - os: ubuntu-latest
+            suffix: "_linux"
+            file_extension: ""
+          - os: windows-latest
+            suffix: "_windows"
+            file_extension: ".exe"
+
+    runs-on: ${{ matrix.os }} # 在矩阵定义的操作系统上运行
+
+    steps:
+      - name: Checkout code # 步骤 1: 获取代码
+        uses: actions/checkout@v4
+
+      # 步骤 2: 编译 C++ 代码
+      - name: Compile C++ with G++
+        id: compile_step # 给这个步骤一个ID，以便后续引用它的输出
+        run: |
+          # 动态生成输出文件名 (e.g., main_linux 或 main_windows.exe)
+          OUTPUT_NAME="main${{ matrix.suffix }}${{ matrix.file_extension }}"
+          # 运行编译命令：g++ -o [输出文件名] main.cpp
+          g++ -o "$OUTPUT_NAME" main.cpp
+          echo "EXECUTABLE_NAME=$OUTPUT_NAME" >> $GITHUB_OUTPUT # 将文件名保存为步骤输出
+
+      # 步骤 3: 上传编译好的可执行文件作为Artifact (工件)
+      # Artifact是工作流任务之间共享文件的方式
+      - name: Upload compiled artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.compile_step.outputs.EXECUTABLE_NAME }} # 工件名称就是可执行文件名
+          path: ${{ steps.compile_step.outputs.EXECUTABLE_NAME }} # 工件路径
+
+  # ==================================
+  # 任务 2: Release (发布)
+  # ==================================
+  release:
+    name: Create GitHub Release and Upload Assets
+    runs-on: ubuntu-latest
+    needs: build # 依赖于 build 任务：必须等所有 Linux/Windows 编译都成功后才运行
+    permissions:
+      contents: write # 必须有写入权限才能创建 Release
+
+    steps:
+      # 步骤 1: 下载所有编译好的 Artifact (Linux和Windows的两个可执行文件)
+      - name: Download all compiled artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts # 将文件下载到本地的 artifacts 文件夹中
+
+      # 步骤 2: 创建 GitHub Release 并上传附件
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1 # 使用一个常用的第三方Action来处理Release
+        with:
+          # 使用当前的 Tag 名称作为 Release 的名称
+          name: Release ${{ github.ref_name }} 
+          # 上传 artifacts 文件夹下的所有文件作为 Release 附件
+          files: ./artifacts/*
+          draft: false # 直接发布，不作为草稿
+          prerelease: false
